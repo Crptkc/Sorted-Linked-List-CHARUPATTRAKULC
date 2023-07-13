@@ -1,7 +1,12 @@
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+
 #include "node.h"
 
 class LL {
-  NodePtr hol; // head of linked list
+  NodePtr hol;
   int size;
 
 public:
@@ -10,12 +15,10 @@ public:
   int isEmpty();
   void insert(int value);
   void printList();
- 
+  void printList_reverse();
+  int get_size(){return size;}
   ~LL();
-/* With doubly linked list*/
-/*
- void printListR();
-*/
+
 };
 
 LL::LL() {
@@ -35,98 +38,121 @@ LL::~LL() {
   }
 }
 
-// insert a new value into the list in sorted order
-void LL::insertc(int value) {
-  NodePtr newPtr = new Node(value);  // create node & put value in
 
-  if (newPtr != nullptr) { 
-    if (hol == nullptr) { //case that the list is empty
-      hol = newPtr;
-      newPtr->set_next(newPtr); //make it point to itself
-      newPtr->set_prev(newPtr); //make it point to itself
+void LL::insert(int value) {
+  NodePtr newPtr;      
+  NodePtr previousPtr; 
+  NodePtr currentPtr;  
+
+  
+  newPtr = new Node(value);
+
+  if (newPtr != NULL) { 
+    previousPtr = NULL;
+    currentPtr = hol;
+   
+    while (currentPtr != NULL && value > currentPtr->get_data()) {
+      previousPtr = currentPtr;            
+      currentPtr = currentPtr->get_next(); 
+                                          
     } 
-    else {
-      NodePtr currentPtr = hol;
-      while (currentPtr->get_next() != hol && value > currentPtr->get_next()->get_data()) {
-        currentPtr = currentPtr->get_next();
-      }
-      newPtr->set_next(currentPtr->get_next()); 
-      currentPtr->get_next()->set_prev(newPtr);
-      newPtr->set_prev(currentPtr);
-      currentPtr->set_next(newPtr);
 
-      if(value < hol->get_data()) {
-        hol = newPtr;  // Update the head pointer if the inserted value is smaller than the current head
-      }
-    }
+    if (previousPtr == NULL) {
+        newPtr->set_next(hol);
+      if(hol)
+          hol->set_prev(newPtr);
+        hol = newPtr;
+       
+      }  
+    else { 
+
+      previousPtr->set_next(newPtr);
+      newPtr->set_prev(previousPtr);
+      newPtr->set_next(currentPtr);
+      if(currentPtr)
+        currentPtr->set_prev(newPtr);
+    } 
     ++size;
   } 
   else {
     cout << value << " not inserted. No memory available." << endl;
-  }
-}
+  } 
+} 
+int LL::deletes(int value) {
+  NodePtr previousPtr; 
+  NodePtr currentPtr;  
+  NodePtr tempPtr;     
 
-// delete a list element
-int LL::deletesc(int value) {
-  NodePtr currentPtr = hol;  // pointer to current node in list
-  NodePtr tempPtr = nullptr; // temporary node pointer
-
-  if (currentPtr == nullptr) {
-    return '\0';
-  }
-  //check if deleted one is at the head
   if (value == hol->get_data()) {
-    tempPtr = hol;  
-    hol = hol->get_next();
-    // Update the previous pointer of the new head
-    
-    if (hol != nullptr) {
-      hol->set_prev(currentPtr->get_prev());
-      currentPtr->get_prev()->set_next(hol);
-    } else {
-      // If the list becomes empty, set hol to nullptr
-      hol = nullptr;
-    }
+    tempPtr = hol;        
+    hol = hol->get_next(); 
+   
     size--;
-    delete tempPtr;
+
+    delete tempPtr; 
+
     return value;
-  }
-  else {
-    currentPtr = hol->get_next();
-
-    while (currentPtr != hol) { //looking for node to be deleted
-      if (value == currentPtr->get_data()) {
-        tempPtr = currentPtr;
-        currentPtr->get_prev()->set_next(currentPtr->get_next());
-        currentPtr->get_next()->set_prev(currentPtr->get_prev());
-        size--;
-        //circular ll updated
-
-        delete tempPtr;
-        return value;
-      }    
-      currentPtr = currentPtr->get_next(); // slide
-    }
-  }
-
-  return '\0';
-}
-
-void LL::printListRc() {
-  if (isEmpty()) {
-    cout << "The List is empty" << endl;
-    return;
   } 
   else {
-    cout << "The reverse list is:" << endl;
-    NodePtr currentPtr = hol;  // Start from head
+    previousPtr = hol;
+    currentPtr = hol->get_next();
 
-    for (int i = 0; i < size; i++) {
+    while (currentPtr != NULL && currentPtr->get_data() != value) {
+      previousPtr = currentPtr;            
+      currentPtr = currentPtr->get_next(); 
+      if (currentPtr == hol)
+        currentPtr = NULL;
+    } 
+    if (currentPtr != NULL) {
+      tempPtr = currentPtr;
+      previousPtr->set_next(currentPtr->get_next());
+      delete tempPtr;
+      size--;
+      return value;
+    }
+  } 
+
+  return '\0';
+} 
+int LL::isEmpty() { 
+  return hol == NULL; 
+} 
+
+void LL::printList() {
+  NodePtr currentPtr = hol;
+
+  if (size == 0) {
+    cout << "List is empty." << endl;
+  }
+  else {
+    cout << "The list is:" << endl;
+
+    int i;
+    for (i = 0; i < size; i++) {
       currentPtr->print();
       cout << "  ->";
-      currentPtr = currentPtr->get_prev(); //loop backward
+      currentPtr = currentPtr->get_next();
     }
 
-    cout << " NULL" << endl;
+    puts("NULL\n");
+  } 
+}
+
+void LL::printList_reverse(){
+  NodePtr currentPtr = hol;
+  if(size==0){
+    cout<<"list is empty\n";
+  }
+  else{
+    cout<<"reverse list is : \n";
+    for(int i=0;i<size-1;i++){
+      currentPtr = currentPtr->get_next();
+    }
+    for(int i=0;i<size;i++){
+      currentPtr->print();
+      cout<<" ->";
+      currentPtr=currentPtr->get_prev();
+    }
+    puts("NULL\n");
   }
 }
